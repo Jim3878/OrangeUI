@@ -60,6 +60,14 @@ public class PlatHandler : IPlatHandler, ILogTraceable
             return _isTerminate;
         }
     }
+    public int ButtonCount
+    {
+        get
+        {
+            LifeCheck();
+            return this.buttonHandlerList.Count;
+        }
+    }
 
     public event EventHandler<ShowHideArgs> onShow;
     public event EventHandler<ShowHideArgs> onHide;
@@ -71,39 +79,40 @@ public class PlatHandler : IPlatHandler, ILogTraceable
     public event EventHandler onInitialize;
     public event EventHandler onTerminate;
 
-    private Dictionary<int, IButtonHandler> buttonHandlerList = new Dictionary<int, IButtonHandler>();
+    private Dictionary<int, IButtonHandler> buttonHandlerList;
 
     public PlatHandler(int ID)
     {
         this._ID = ID;
+        _isInitialize = false;
         _isTerminate = false;
         log += string.Format("new()\n{0}\n\n", Utilty.CallStack());
     }
 
     public void CompleteHide()
     {
-        if (!isTerminate)
-        {
-            _isShow = false;
-            if (onHide != null)
-                onHide(this, new ShowHideArgs(true));
-            log += string.Format("CompleteHide()\n{0}\n\n", Utilty.CallStack());
-        }
+        LifeCheck();
+        _isShow = false;
+        if (onHide != null)
+            onHide(this, new ShowHideArgs(true));
+        log += string.Format("CompleteHide()\n{0}\n\n", Utilty.CallStack());
+
     }
 
     public void CompleteShow()
     {
-        if (!isTerminate)
-        {
-            _isShow = true;
-            if (onShow != null)
-                onShow(this, new ShowHideArgs(true));
-            log += string.Format("CompleteShow()\n{0}\n\n", Utilty.CallStack());
-        }
+        LifeCheck();
+
+        _isShow = true;
+        if (onShow != null)
+            onShow(this, new ShowHideArgs(true));
+        log += string.Format("CompleteShow()\n{0}\n\n", Utilty.CallStack());
+
     }
 
     public IButtonHandler[] GetAllButton()
     {
+        LifeCheck();
         IButtonHandler[] buttonHandlerArr = new IButtonHandler[buttonHandlerList.Count];
         int i = 0;
         foreach (var keyValuePair in buttonHandlerList)
@@ -117,6 +126,7 @@ public class PlatHandler : IPlatHandler, ILogTraceable
 
     public IButtonHandler GetButton(int id)
     {
+        LifeCheck();
         try
         {
             if (buttonHandlerList.ContainsKey(id))
@@ -134,7 +144,8 @@ public class PlatHandler : IPlatHandler, ILogTraceable
 
     public void Hide()
     {
-        if (!isTerminate && isEnable && isShow)
+        LifeCheck();
+        if (isEnable && isShow)
         {
             _isShow = false;
             if (onHide != null)
@@ -147,7 +158,8 @@ public class PlatHandler : IPlatHandler, ILogTraceable
 
     public void Show()
     {
-        if (!isTerminate && isEnable && !isShow)
+        LifeCheck();
+        if (isEnable && !isShow)
         {
             _isShow = true;
             if (onShow != null)
@@ -162,21 +174,46 @@ public class PlatHandler : IPlatHandler, ILogTraceable
     {
         if (!isInitialize)
         {
+            buttonHandlerList = new Dictionary<int, IButtonHandler>();
             _isInitialize = true;
             this._orange = orange;
+            _isEnable = false;
             CompleteHide();
+            if (onInitialize != null)
+                onInitialize(this, new EventArgs());
+
+            log += string.Format("Initialize()\n{0}\n\n", Utilty.CallStack());
+        }
+    }
+
+    public void Initialize(IOrange orange, params IButtonHandler[] btns)
+    {
+        if (!isInitialize)
+        {
+            buttonHandlerList = new Dictionary<int, IButtonHandler>();
+            this._orange = orange;
+            _isInitialize = true;
+            InitializeButton(btns);
+
             SetEnable(false);
             if (onInitialize != null)
                 onInitialize(this, new EventArgs());
-            InitializeButtonList();
+
             log += string.Format("Initialize()\n{0}\n\n", Utilty.CallStack());
         }
-        else
-            log += string.Format("Initialize()\n但早就Initialize過了\n{0}\n\n", Utilty.CallStack());
+    }
+
+    private void InitializeButton(IButtonHandler[] btns)
+    {
+        for (int i = 0; i < btns.Length; i++)
+        {
+            RegistButtonHandler(btns[i]);
+        }
     }
 
     public void RegistButtonHandler(IButtonHandler btn)
     {
+        LifeCheck();
         int id = btn.ID;
         if (buttonHandlerList.ContainsKey(id))
         {
@@ -193,15 +230,18 @@ public class PlatHandler : IPlatHandler, ILogTraceable
         }
         if (onButtonRegisted != null)
             onButtonRegisted(this, new RegistButtonArgs(btn));
+
     }
 
     public void RemoveButtonHandler(int id)
     {
+        LifeCheck();
         var btn = buttonHandlerList[id];
         buttonHandlerList.Remove(id);
 
         if (btn != null)
         {
+            btn.Terminate();
             if (onButtonRemoved != null)
                 onButtonRemoved(this, new RemoveButtonArgs(btn));
             log += string.Format("RemoveButton(id:{1})\n移除成功\n{0}\n\n", Utilty.CallStack(), id);
@@ -210,10 +250,12 @@ public class PlatHandler : IPlatHandler, ILogTraceable
         {
             log += string.Format("RemoveButton(id:{1})\n嘗試移除不存在的ButtonHandler\n{0}\n\n", Utilty.CallStack(), id);
         }
+
     }
 
     public void SetEnable(bool value)
     {
+        LifeCheck();
         if (isEnable != value)
         {
             _isEnable = value;
@@ -230,37 +272,61 @@ public class PlatHandler : IPlatHandler, ILogTraceable
             }
             log += string.Format("SetEnable( value:{1} )\n{0}\n\n", Utilty.CallStack(), value);
         }
-        log += string.Format("SetEnable( value:{1} )\n但是value==isEnable\n{0}\n\n", Utilty.CallStack(), value);
-    }
-
-    public void TreggerButton(int id)
-    {
-        if (!isTerminate)
+        else
         {
-            if (buttonHandlerList[id].isEnable)
-            {
-                if (onButtonTrigger != null)
-                    onButtonTrigger(this, new TriggerButtonArgs(id));
-                log += string.Format("Trigger( id:{1} )\n{0}\n\n", Utilty.CallStack(), id);
-            }
+            log += string.Format("SetEnable( value:{1} )\n但是value==isEnable\n{0}\n\n", Utilty.CallStack(), value);
         }
-        log += string.Format("Trigger( id:{1} )\n但是Button.isEnable = false\n{0}\n\n", Utilty.CallStack(), id);
     }
 
-    private void InitializeButtonList()
+    public void TriggerButton(int id)
     {
-        foreach (var keyValuePair in buttonHandlerList)
+        LifeCheck();
+        if (buttonHandlerList[id].isEnable)
         {
-            keyValuePair.Value.Initialize(this);
+            if (onButtonTrigger != null)
+                onButtonTrigger(this, new TriggerButtonArgs(id));
+            log += string.Format("Trigger( id:{1} )\n{0}\n\n", Utilty.CallStack(), id);
+        }
+    }
+
+    public void LifeCheck()
+    {
+        if (isTerminate)
+        {
+            throw new Exception("介面已經終止");
+        }
+        if (!isInitialize)
+        {
+            throw new Exception("還末初始化");
         }
     }
 
     public void Terminate()
     {
+        if (isTerminate)
+        {
+            throw new Exception("介面已終止");
+        }
         _isTerminate = true;
+        foreach (var btn in buttonHandlerList)
+        {
+            btn.Value.Terminate();
+        }
+        if (!orange.isTerminate && orange.hasPlatHandler(ID))
+        {
+            orange.RemovePlatHandler(ID);
+        }
+
+        orange.RemovePlatHandler(ID);
         if (onTerminate != null)
             onTerminate(this, new EventArgs());
         log += string.Format("Terminate()\n{0}\n\n", Utilty.CallStack());
+    }
+
+    public bool HasButtonHandler(int id)
+    {
+        LifeCheck();
+        return buttonHandlerList.ContainsKey(id);
     }
 
     public string GetLog()
@@ -272,4 +338,6 @@ public class PlatHandler : IPlatHandler, ILogTraceable
     {
         log = "";
     }
+
+
 }

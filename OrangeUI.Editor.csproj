@@ -288,6 +288,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\OrangeUI\Test\Editor\ButtonHandlerTest.cs" />
     <Compile Include="Assets\OrangeUI\Test\Editor\PlatHandlerTest.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -7,8 +7,21 @@ using System;
 
 public class PlatHandlerTest
 {
+
     public class DummyOrange : IOrange
     {
+        public bool isInitialize
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public bool isTerminate { get { return false; } }
+
+        public int count { get { return 0; } }
+
         public IPlatHandler[] GetAllPlatHandler()
         {
             throw new NotImplementedException();
@@ -19,7 +32,27 @@ public class PlatHandlerTest
             throw new NotImplementedException();
         }
 
+        public bool hasPlatHandler(int id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Initialize()
+        {
+            throw new NotImplementedException();
+        }
+
+        public int PlatHandlerCount()
+        {
+            throw new NotImplementedException();
+        }
+
         public void RegistPlatHandler(int id, IPlatHandler platHandler)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void RegistPlatHandler(IPlatHandler platHandler)
         {
             throw new NotImplementedException();
         }
@@ -28,12 +61,18 @@ public class PlatHandlerTest
         {
             throw new NotImplementedException();
         }
+
+        public void Terminate()
+        {
+            throw new NotImplementedException();
+        }
     }
     public class DummyButton : IButtonHandler
     {
         public IPlatHandler platHandler { get { return null; } }
 
-        public int ID { get { return -1; } }
+        public int _ID;
+        public int ID { get { return _ID; } }
 
         public bool isEnable { get { return false; } }
 
@@ -55,6 +94,16 @@ public class PlatHandlerTest
             initizlie++;
         }
 
+        public DummyButton()
+        {
+            this._ID = -1;
+        }
+
+        public DummyButton(int id)
+        {
+            this._ID = id;
+        }
+
         public ButtonState state;
         public void SetButtonState(ButtonState state)
         {
@@ -68,143 +117,136 @@ public class PlatHandlerTest
         }
 
         public int terminated = 0;
-        public void Terminated()
+        public void Terminate()
         {
             terminated++;
         }
     }
 
-    public class RegistRemoveButtonHandlerTest
+    [Test]
+    public void RegistButtonHandler_WithOutInitialize_Throw()
     {
-        [Test]
-        public void RegistButtonHandler_BeforeInitialize_ButtonWillInitializeTwice()
+        PlatHandler plat = new PlatHandler(0);
+        DummyButton btn = new DummyButton();
+
+        
+        Assert.Throws<Exception>(()=> plat.RegistButtonHandler(btn));
+        
+
+        Assert.AreEqual(0, btn.initizlie);
+    }
+
+    [Test]
+    public void RegistButtonHandler_AfterInitialize_ButtonWillInitialize()
+    {
+        var plat = GetPlatHandler();
+        DummyButton btn = new DummyButton();
+
+        plat.Initialize(new DummyOrange());
+        plat.RegistButtonHandler(btn);
+
+        Assert.AreEqual(1, btn.initizlie);
+    }
+
+    private int showCount;
+    private int hideCount;
+
+    [Test]
+    public void Count_Test()
+    {
+        var plat = GetShowHideTestPlatHandler();
+        plat.Initialize(new DummyOrange());
+
+        plat.RegistButtonHandler(new DummyButton(0));
+        plat.RegistButtonHandler(new DummyButton(1));
+        plat.RegistButtonHandler(new DummyButton(2));
+        plat.RegistButtonHandler(new DummyButton(3));
+
+        Assert.AreEqual(4, plat.ButtonCount);
+    }
+
+    [Test]
+    public void ShowHide_AfterTerminated_Throw()
+    {
+        var plat = GetShowHideTestPlatHandler();
+        plat.Initialize(GetDummyOrange());
+        plat.SetEnable(true);
+        plat.Show();
+        plat.Hide();
+        plat.Terminate();
+        Assert.Throws<Exception>(() => plat.Show());
+
+        try
         {
-            PlatHandler plat = new PlatHandler(0);
-            DummyButton btn = new DummyButton();
-
-            plat.RegistButtonHandler(btn);
-            plat.Initialize(new DummyOrange());
-
-            Assert.AreEqual(2, btn.initizlie);
+            ShowHideCount_Equals(1, 2);
         }
-
-        [Test]
-        public void RegistButtonHandler_AfterInitialize_ButtonWillInitialize()
+        catch (Exception)
         {
-            var plat = GetPlatHandler();
-            DummyButton btn = new DummyButton();
-
-            plat.Initialize(new DummyOrange());
-            plat.RegistButtonHandler(btn);
-
-            Assert.AreEqual(1, btn.initizlie);
+            Debug.Log(plat.GetLog());
+            throw;
         }
     }
-    
-    public class ShowHideTest
+
+    [Test]
+    public void ShowHide_BeforeInitialize_ThrowException()
     {
-        private int showCount;
-        private int hideCount;
+        var plat = GetShowHideTestPlatHandler();
 
-        [Test]
-        public void ShowHide_AfterTerminated_WillNotShow()
-        {
-            var plat = GetShowHideTestPlatHandler();
-            plat.Initialize(GetDummyOrange());
+        Assert.Throws<Exception>(() => plat.Hide());
+        plat.Initialize(GetDummyOrange());
 
-            plat.Terminate();
-            plat.Hide();
-            plat.Show();
-            plat.Hide();
-            plat.Show();
-            plat.Hide();
-            plat.Show();
+        ShowHideCount_Equals(0, 1);
 
-            try
-            {
-                ShowHideCount_Equals(0, 1);
-            }
-            catch (Exception)
-            {
-                Debug.Log(plat.GetLog());
-                throw;
-            }
-        }
+    }
 
-        [Test]
-        public void ShowHide_BeforeInitialize_WillNotShow()
-        {
-            var plat = GetShowHideTestPlatHandler();
+    [Test]
+    public void ShowHide_OnDisable_WillNotShow()
+    {
+        var plat = GetShowHideTestPlatHandler();
+        plat.Initialize(GetDummyOrange());
 
-            plat.Hide();
-            plat.Show();
-            plat.Hide();
-            plat.Show();
-            plat.Hide();
-            plat.Show();
-            plat.Initialize(GetDummyOrange());
+        plat.SetEnable(false);
+        plat.Hide();
+        plat.Show();
+        plat.Hide();
+        plat.Show();
+        plat.Hide();
+        plat.Show();
 
-            ShowHideCount_Equals(0, 1);
+        ShowHideCount_Equals(0, 1);
+    }
 
-        }
+    [Test]
+    public void CompleteShowHide_AfterTerminated_ThrowException()
+    {
+        var plat = GetShowHideTestPlatHandler();
+        plat.Initialize(GetDummyOrange());
 
-        [Test]
-        public void ShowHide_OnDisable_WillNotShow()
-        {
-            var plat = GetShowHideTestPlatHandler();
-            plat.Initialize(GetDummyOrange());
+        plat.Terminate();
+        Assert.Throws<Exception>(() => plat.Show());
+    }
 
-            plat.SetEnable(false);
-            plat.Hide();
-            plat.Show();
-            plat.Hide();
-            plat.Show();
-            plat.Hide();
-            plat.Show();
+    public void ShowHideCount_Equals(int showCount = 0, int hideCount = 0)
+    {
+        Assert.AreEqual(showCount, this.showCount);
+        Assert.AreEqual(hideCount, this.hideCount);
+    }
 
-            ShowHideCount_Equals(0, 1);
-        }
-
-        [Test]
-        public void CompleteShowHide_AfterTerminated_WillNotShowHide()
-        {
-            var plat = GetShowHideTestPlatHandler();
-            plat.Initialize(GetDummyOrange());
-
-            plat.Terminate();
-            plat.CompleteHide();
-            plat.CompleteShow();
-            plat.CompleteHide();
-            plat.CompleteShow();
-            plat.CompleteHide();
-            plat.CompleteShow();
-
-            ShowHideCount_Equals(0, 1);
-        }
-
-        public void ShowHideCount_Equals(int showCount = 0, int hideCount = 0)
-        {
-            Assert.AreEqual(showCount, this.showCount);
-            Assert.AreEqual(hideCount, this.hideCount);
-        }
-        PlatHandler GetShowHideTestPlatHandler()
-        {
-            var plat = GetPlatHandler();
-            showCount = 0;
-            hideCount = 0;
-            plat.onHide += (a, b) => hideCount++;
-            plat.onShow += (a, b) => showCount++;
-            return plat;
-        }
-
-
+    PlatHandler GetShowHideTestPlatHandler()
+    {
+        var plat = GetPlatHandler();
+        showCount = 0;
+        hideCount = 0;
+        plat.onHide += (a, b) => hideCount++;
+        plat.onShow += (a, b) => showCount++;
+        return plat;
     }
 
     static PlatHandler GetPlatHandler()
     {
         return new PlatHandler(0);
     }
-    
+
     static IOrange GetDummyOrange()
     {
         return new DummyOrange();

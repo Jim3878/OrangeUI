@@ -21,6 +21,6 @@ public interface IButtonHandler  {
     void Initialize(IPlatHandler platHandler);
     void SetButtonState(ButtonState state);
     void SetEnable(bool value);
-    void Terminated();
+    void Terminate();
 	
 }

@@ -14,13 +14,14 @@ public interface IPlatHandler
     event EventHandler onDisable;
     event EventHandler onInitialize;
     event EventHandler onTerminate;
-    
+
     IOrange orange { get; }
     int ID { get; }
     bool isShow { get; }
     bool isEnable { get; }
     bool isInitialize { get; }
     bool isTerminate { get; }
+    int ButtonCount { get; }
 
     void Initialize(IOrange orange);
     void Show();
@@ -30,8 +31,9 @@ public interface IPlatHandler
     void SetEnable(bool value);
     void RegistButtonHandler(IButtonHandler btn);
     void RemoveButtonHandler(int id);
+    bool HasButtonHandler(int id);
     void Terminate();
     IButtonHandler GetButton(int id);
     IButtonHandler[] GetAllButton();
-    void TreggerButton(int id);
+    void TriggerButton(int id);
 }
