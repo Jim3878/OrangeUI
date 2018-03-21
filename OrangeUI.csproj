@@ -282,6 +282,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\OrangeUI\Component\BB.cs" />
+    <Compile Include="Assets\OrangeUI\Component\ButtonComponent.cs" />
+    <Compile Include="Assets\OrangeUI\Component\OrangeComponent.cs" />
+    <Compile Include="Assets\OrangeUI\Component\PlatComponent.cs" />
     <Compile Include="Assets\OrangeUI\Core\ButtonHandler.cs" />
     <Compile Include="Assets\OrangeUI\Core\Interface\IButtonHandler.cs" />
     <Compile Include="Assets\OrangeUI\Core\Interface\IOrange.cs" />
@@ -290,6 +294,7 @@
     <Compile Include="Assets\OrangeUI\Core\PlatHandler.cs" />
     <Compile Include="Assets\OrangeUI\Core\Value\ButtonState.cs" />
     <Compile Include="Assets\OrangeUI\Core\Value\EventValue.cs" />
+    <Compile Include="Assets\OrangeUI\Test\ComponentBindTest.cs" />
     <Compile Include="Assets\OrangeUI\Utility\TransformUtility.cs" />
     <Compile Include="Assets\OrangeUI\Utility\Utilty.cs" />
   </ItemGroup>

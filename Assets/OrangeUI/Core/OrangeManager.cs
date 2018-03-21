@@ -30,6 +30,21 @@ public class OrangeManager : IOrange
         }
     }
 
+    public OrangeManager()
+    {
+        _isInitialize = false;
+        _isTerminate = false;
+    }
+
+    public void Initialize()
+    {
+        if (!isInitialize)
+        {
+            _isInitialize = true;
+            platHandlerList = new Dictionary<int, IPlatHandler>();
+        }
+    }
+
     public IPlatHandler[] GetAllPlatHandler()
     {
         IPlatHandler[] result = new IPlatHandler[platHandlerList.Count];
@@ -64,6 +79,7 @@ public class OrangeManager : IOrange
             platHandlerList.Remove(id);
             Debug.Log("[Orange]覆蓋已存在之PlatHandler ID = " + platHandler.ID);
         }
+        platHandlerList.Add(platHandler.ID, platHandler);
         platHandler.Initialize(this);
 
     }
@@ -89,22 +105,23 @@ public class OrangeManager : IOrange
 
     }
 
-    public void Initialize()
-    {
-        if (!isInitialize)
-        {
-            _isInitialize = true;
-        }
-    }
-
     public void Terminate()
     {
+        if (isTerminate)
+            throw new Exception("橘子已終止");
         if (!isTerminate)
         {
             _isTerminate = true;
+            IPlatHandler[] phArr = new PlatHandler[platHandlerList.Count];
+            int index = 0;
             foreach (var plat in platHandlerList)
             {
-                plat.Value.Terminate();
+                phArr[index] = plat.Value;
+                index++;
+            }
+            for(int i = 0; i < phArr.Length; i++)
+            {
+                phArr[i].Terminate();
             }
         }
     }

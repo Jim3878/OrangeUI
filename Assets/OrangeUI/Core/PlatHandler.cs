@@ -308,16 +308,22 @@ public class PlatHandler : IPlatHandler, ILogTraceable
             throw new Exception("介面已終止");
         }
         _isTerminate = true;
+        IButtonHandler[] bhArr = new ButtonHandler[buttonHandlerList.Count];
+        int index = 0;
         foreach (var btn in buttonHandlerList)
         {
-            btn.Value.Terminate();
+            bhArr[index] = btn.Value;
+            index++;
         }
+        for(int i = 0; i < bhArr.Length; i++)
+        {
+            bhArr[i].Terminate();
+        }
+
         if (!orange.isTerminate && orange.hasPlatHandler(ID))
         {
             orange.RemovePlatHandler(ID);
         }
-
-        orange.RemovePlatHandler(ID);
         if (onTerminate != null)
             onTerminate(this, new EventArgs());
         log += string.Format("Terminate()\n{0}\n\n", Utilty.CallStack());
