@@ -9,7 +9,6 @@ public interface IPlatHandler
     event EventHandler<ShowHideArgs> onHide;
     event EventHandler<RegistButtonArgs> onButtonRegisted;
     event EventHandler<RemoveButtonArgs> onButtonRemoved;
-    event EventHandler<TriggerButtonArgs> onButtonTrigger;
     event EventHandler onEnable;
     event EventHandler onDisable;
     event EventHandler onInitialize;
@@ -35,5 +34,4 @@ public interface IPlatHandler
     void Terminate();
     IButtonHandler GetButton(int id);
     IButtonHandler[] GetAllButton();
-    void TriggerButton(int id);
 }

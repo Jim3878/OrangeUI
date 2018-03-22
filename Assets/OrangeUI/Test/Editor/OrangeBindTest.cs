@@ -4,7 +4,9 @@ using UnityEngine.TestTools;
 using NUnit.Framework;
 using System.Collections;
 
-public class OrangeBindTest {
+public class OrangeBindTest
+{
+   
 
     [Test]
     public void OrangerIsTerminate_AfterTerminate_IsTerminateWillTransToTrue()
@@ -18,15 +20,16 @@ public class OrangeBindTest {
         Assert.IsTrue(om.isTerminate);
     }
 
-	[Test]
-	public void OrangeTerminate_CallTerminate_AllPlatHandlerWillTerminateToo() {
+    [Test]
+    public void OrangeTerminate_CallTerminate_AllPlatHandlerWillTerminateToo()
+    {
         // Use the Assert class to test conditions.
 
         OrangeManager om = new OrangeManager();
         int platHandlerCount = 10;
         PlatHandler[] ph = new PlatHandler[platHandlerCount];
         om.Initialize();
-        for(int i = 0; i < platHandlerCount; i++)
+        for (int i = 0; i < platHandlerCount; i++)
         {
             ph[i] = new PlatHandler(i);
             om.RegistPlatHandler(ph[i]);
@@ -37,7 +40,7 @@ public class OrangeBindTest {
         Assert.IsTrue(om.isTerminate);
         for (int i = 0; i < platHandlerCount; i++)
         {
-            Assert.IsTrue(ph[i].isTerminate);   
+            Assert.IsTrue(ph[i].isTerminate);
         }
     }
 
@@ -51,7 +54,7 @@ public class OrangeBindTest {
         ButtonHandler[] bh = new ButtonHandler[btnCount];
         om.Initialize();
         om.RegistPlatHandler(ph);
-        for(int i = 0; i < btnCount; i++)
+        for (int i = 0; i < btnCount; i++)
         {//建立按鈕並注冊
             bh[i] = new ButtonHandler(i);
             ph.RegistButtonHandler(bh[i]);
@@ -62,7 +65,7 @@ public class OrangeBindTest {
         //確認介面及其下的按鈕是否銷毀，以及是否從橘子反注冊
         Assert.IsTrue(ph.isTerminate);
         Assert.IsFalse(om.hasPlatHandler(platID));
-        for(int i = 0; i < btnCount; i++)
+        for (int i = 0; i < btnCount; i++)
         {
             Assert.IsTrue(bh[i].isTerminated);
         }
@@ -91,7 +94,7 @@ public class OrangeBindTest {
         om.Initialize();
         om.RegistPlatHandler(ph);
 
-        for(int i = 0; i < btnCount; i++)
+        for (int i = 0; i < btnCount; i++)
         {
             ph.HasButtonHandler(i);
         }

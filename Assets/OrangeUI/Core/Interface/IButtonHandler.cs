@@ -10,6 +10,7 @@ public interface IButtonHandler  {
     event EventHandler<ButtonStateArgs> onButtonStateChange;
     event EventHandler onInitialize;
     event EventHandler onTerminated;
+    event EventHandler onTrigger;
 
     IPlatHandler platHandler { get; }
     int ID { get; }

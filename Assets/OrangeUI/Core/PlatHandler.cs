@@ -73,7 +73,7 @@ public class PlatHandler : IPlatHandler, ILogTraceable
     public event EventHandler<ShowHideArgs> onHide;
     public event EventHandler<RegistButtonArgs> onButtonRegisted;
     public event EventHandler<RemoveButtonArgs> onButtonRemoved;
-    public event EventHandler<TriggerButtonArgs> onButtonTrigger;
+    //public event EventHandler<TriggerButtonArgs> onButtonTrigger;
     public event EventHandler onEnable;
     public event EventHandler onDisable;
     public event EventHandler onInitialize;
@@ -117,8 +117,11 @@ public class PlatHandler : IPlatHandler, ILogTraceable
         int i = 0;
         foreach (var keyValuePair in buttonHandlerList)
         {
-            buttonHandlerArr[i] = keyValuePair.Value;
-            i++;
+            if (HasButtonHandler(i))
+            {
+                buttonHandlerArr[i] = keyValuePair.Value;
+                i++;
+            }
         }
         log += string.Format("GetAllButton()\n{0}\n\n", Utilty.CallStack());
         return buttonHandlerArr;
@@ -129,7 +132,7 @@ public class PlatHandler : IPlatHandler, ILogTraceable
         LifeCheck();
         try
         {
-            if (buttonHandlerList.ContainsKey(id))
+            if (HasButtonHandler(id))
             {
                 log += string.Format("GetButton( id:{1} )\n{0}\n\n", Utilty.CallStack(), id);
                 return buttonHandlerList[id];
@@ -215,9 +218,10 @@ public class PlatHandler : IPlatHandler, ILogTraceable
     {
         LifeCheck();
         int id = btn.ID;
-        if (buttonHandlerList.ContainsKey(id))
+        if (HasButtonHandler(id))
         {
-            buttonHandlerList.Remove(id);
+            RemoveButtonHandler(id);
+
             buttonHandlerList.Add(id, btn);
             btn.Initialize(this);
             log += string.Format("RegistButton(id:{1},btn{2})\n移除重覆ButtonHandler\n{0}\n\n", Utilty.CallStack(), id, btn);
@@ -239,7 +243,7 @@ public class PlatHandler : IPlatHandler, ILogTraceable
         var btn = buttonHandlerList[id];
         buttonHandlerList.Remove(id);
 
-        if (btn != null)
+        if (btn != null && !btn.isTerminated)
         {
             btn.Terminate();
             if (onButtonRemoved != null)
@@ -248,7 +252,7 @@ public class PlatHandler : IPlatHandler, ILogTraceable
         }
         else
         {
-            log += string.Format("RemoveButton(id:{1})\n嘗試移除不存在的ButtonHandler\n{0}\n\n", Utilty.CallStack(), id);
+            log += string.Format("RemoveButton(id:{1})\n嘗試移除不存在或已終止的ButtonHandler\n{0}\n\n", Utilty.CallStack(), id);
         }
 
     }
@@ -278,16 +282,16 @@ public class PlatHandler : IPlatHandler, ILogTraceable
         }
     }
 
-    public void TriggerButton(int id)
-    {
-        LifeCheck();
-        if (buttonHandlerList[id].isEnable)
-        {
-            if (onButtonTrigger != null)
-                onButtonTrigger(this, new TriggerButtonArgs(id));
-            log += string.Format("Trigger( id:{1} )\n{0}\n\n", Utilty.CallStack(), id);
-        }
-    }
+    //public void TriggerButton(int id)
+    //{
+    //    LifeCheck();
+    //    if (HasButtonHandler(id) && buttonHandlerList[id].isEnable)
+    //    {
+    //        if (onButtonTrigger != null)
+    //            onButtonTrigger(this, new TriggerButtonArgs(id));
+    //        log += string.Format("Trigger( id:{1} )\n{0}\n\n", Utilty.CallStack(), id);
+    //    }
+    //}
 
     public void LifeCheck()
     {
@@ -315,15 +319,11 @@ public class PlatHandler : IPlatHandler, ILogTraceable
             bhArr[index] = btn.Value;
             index++;
         }
-        for(int i = 0; i < bhArr.Length; i++)
+        for (int i = 0; i < bhArr.Length; i++)
         {
             bhArr[i].Terminate();
         }
 
-        if (!orange.isTerminate && orange.hasPlatHandler(ID))
-        {
-            orange.RemovePlatHandler(ID);
-        }
         if (onTerminate != null)
             onTerminate(this, new EventArgs());
         log += string.Format("Terminate()\n{0}\n\n", Utilty.CallStack());
@@ -332,7 +332,16 @@ public class PlatHandler : IPlatHandler, ILogTraceable
     public bool HasButtonHandler(int id)
     {
         LifeCheck();
-        return buttonHandlerList.ContainsKey(id);
+        if (buttonHandlerList.ContainsKey(id))
+        {
+            if (buttonHandlerList[id].isTerminated)
+            {
+                buttonHandlerList.Remove(id);
+                return false;
+            }
+            return true;
+        }
+        return false;
     }
 
     public string GetLog()

@@ -87,6 +87,7 @@ public class PlatHandlerTest
         public event EventHandler<ButtonStateArgs> onButtonStateChange;
         public event EventHandler onInitialize;
         public event EventHandler onTerminated;
+        public event EventHandler onTrigger;
 
         public int initizlie = 0;
         public void Initialize(IPlatHandler handler)
@@ -223,6 +224,7 @@ public class PlatHandlerTest
         plat.Initialize(GetDummyOrange());
 
         plat.Terminate();
+
         Assert.Throws<Exception>(() => plat.Show());
     }
 
@@ -249,6 +251,6 @@ public class PlatHandlerTest
 
     static IOrange GetDummyOrange()
     {
-        return new DummyOrange();
+        return new OrangeManager();
     }
 }

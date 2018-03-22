@@ -61,6 +61,7 @@ public class ButtonHandler : IButtonHandler, ILogTraceable
     public event EventHandler<ButtonStateArgs> onButtonStateChange;
     public event EventHandler onInitialize;
     public event EventHandler onTerminated;
+    public event EventHandler onTrigger;
 
     public ButtonHandler(int ID)
     {
@@ -129,8 +130,6 @@ public class ButtonHandler : IButtonHandler, ILogTraceable
         if (!_isTerminated)
         {
             _isTerminated = true;
-            if (!platHandler.isTerminate && platHandler.HasButtonHandler(ID))
-                platHandler.RemoveButtonHandler(ID);
             if (onTerminated != null)
                 onTerminated(this, new EventArgs());
             log += string.Format("Terminated()\n{0}\n\n", Utilty.CallStack());
@@ -144,7 +143,8 @@ public class ButtonHandler : IButtonHandler, ILogTraceable
     public void Trigger()
     {
         LifeCheck();
-        platHandler.TriggerButton(this.ID);
+        if (onTrigger != null)
+            this.onTrigger(this, new EventArgs());
         log += string.Format("Trigger()\n{0}\n\n", Utilty.CallStack());
     }
 

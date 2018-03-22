@@ -51,15 +51,18 @@ public class OrangeManager : IOrange
         int index = 0;
         foreach (var plat in platHandlerList)
         {
-            result[index] = plat.Value;
-            index++;
+            if (hasPlatHandler(plat.Key))
+            {
+                result[index] = plat.Value;
+                index++;
+            }
         }
         return result;
     }
 
     public IPlatHandler GetPlatHandler(int id)
     {
-        if (!platHandlerList.ContainsKey(id))
+        if (!hasPlatHandler(id))
         {
             throw new KeyNotFoundException("找不到你要的plat唷\nID = " + id);
         }
@@ -68,15 +71,24 @@ public class OrangeManager : IOrange
 
     public bool hasPlatHandler(int id)
     {
-        return platHandlerList.ContainsKey(id);
+        if (platHandlerList.ContainsKey(id))
+        {
+            if (platHandlerList[id].isTerminate)
+            {
+                platHandlerList.Remove(id);
+                return false;
+            }
+            return true;
+        }
+        return false;
     }
 
     public void RegistPlatHandler(IPlatHandler platHandler)
     {
         int id = platHandler.ID;
-        if (platHandlerList.ContainsKey(id))
+        if (hasPlatHandler(id))
         {
-            platHandlerList.Remove(id);
+            RemovePlatHandler(id);
             Debug.Log("[Orange]覆蓋已存在之PlatHandler ID = " + platHandler.ID);
         }
         platHandlerList.Add(platHandler.ID, platHandler);
@@ -86,7 +98,7 @@ public class OrangeManager : IOrange
 
     public void RemovePlatHandler(int id)
     {
-        if (!platHandlerList.ContainsKey(id))
+        if (!hasPlatHandler(id))
         {
             throw new KeyNotFoundException("企圖移除不存在的PlatHandler");
         }
@@ -119,7 +131,7 @@ public class OrangeManager : IOrange
                 phArr[index] = plat.Value;
                 index++;
             }
-            for(int i = 0; i < phArr.Length; i++)
+            for (int i = 0; i < phArr.Length; i++)
             {
                 phArr[i].Terminate();
             }

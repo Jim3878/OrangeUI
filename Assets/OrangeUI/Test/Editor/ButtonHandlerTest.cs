@@ -5,10 +5,12 @@ using NUnit.Framework;
 using System.Collections;
 using System;
 
-public class ButtonHandlerTest {
+public class ButtonHandlerTest
+{
 
     [Test]
-    public void Initialize_Check_Test() {
+    public void Initialize_Check_Test()
+    {
         ButtonHandler btn = new ButtonHandler(1);
 
         Assert.Throws<Exception>(() => btn.SetEnable(true));
@@ -19,13 +21,15 @@ public class ButtonHandlerTest {
     [Test]
     public void Trigger_Test()
     {
-        int btnID=10;
+        int btnID = 10;
         ButtonHandler btn = new ButtonHandler(btnID);
         PlatHandler plat = new PlatHandler(1);
         plat.Initialize(new PlatHandlerTest.DummyOrange());
         plat.RegistButtonHandler(btn);
         int isTrigger = -1;
-        plat.onButtonTrigger += (a, b) => isTrigger = b.ID;
+        btn.onTrigger += (a, b) => {
+            isTrigger = (a as ButtonHandler).ID;
+        };
 
         plat.SetEnable(true);
         btn.SetEnable(true);
@@ -34,7 +38,8 @@ public class ButtonHandlerTest {
         try
         {
             Assert.AreEqual(btnID, isTrigger);
-        }catch(Exception e)
+        }
+        catch (Exception e)
         {
             Debug.Log(plat.GetLog());
             Debug.Log("====================");
@@ -43,5 +48,5 @@ public class ButtonHandlerTest {
         }
 
     }
-    
+
 }
