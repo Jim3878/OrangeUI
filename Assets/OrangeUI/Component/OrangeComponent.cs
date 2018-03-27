@@ -30,7 +30,8 @@ public class OrangeComponent : MonoBehaviour
             _orange.Initialize();
             foreach (var plat in platList)
             {
-                _orange.RegistPlatHandler(plat.handler);
+                _orange.RegistPlatHandler(plat.handler,plat.GetStaticButtonArray());
+                Debug.Log("[Orange]Initilize plat " + plat.gameObject.name);
             }
         }
     }

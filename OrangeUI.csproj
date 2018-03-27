@@ -294,9 +294,9 @@
     <Compile Include="Assets\OrangeUI\Core\PlatHandler.cs" />
     <Compile Include="Assets\OrangeUI\Core\Value\ButtonState.cs" />
     <Compile Include="Assets\OrangeUI\Core\Value\EventValue.cs" />
-    <Compile Include="Assets\OrangeUI\Test\ComponentBindTest.cs" />
     <Compile Include="Assets\OrangeUI\Utility\TransformUtility.cs" />
     <Compile Include="Assets\OrangeUI\Utility\Utilty.cs" />
+    <Compile Include="Assets\Test\ComponentBindTest.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GenerateTargetFrameworkMonikerAttribute" />

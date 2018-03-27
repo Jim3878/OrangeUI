@@ -83,7 +83,10 @@ public class ButtonHandler : IButtonHandler, ILogTraceable
                 onInitialize(this, new EventArgs());
             log += string.Format("Initialize()\n{0}\n\n", Utilty.CallStack());
         }
-        log += string.Format("Initialize()\n然而早已Init過\n{0}\n\n", Utilty.CallStack());
+        else
+        {
+            log += string.Format("Initialize()\n然而早已Init過\n{0}\n\n", Utilty.CallStack());
+        }
     }
 
     public void SetButtonState(ButtonState state)
@@ -91,11 +94,15 @@ public class ButtonHandler : IButtonHandler, ILogTraceable
         LifeCheck();
         if (state != currentState)
         {
+            _currentState = state;
             if (onButtonStateChange != null)
                 onButtonStateChange(this, new ButtonStateArgs(state));
             log += string.Format("SetButtonState(state:{1})\n{0}\n\n", Utilty.CallStack(), state);
         }
-        log += string.Format("SetButtonState(state:{1})\n但State是相同的\n{0}\n\n", Utilty.CallStack(), state);
+        else
+        {
+            log += string.Format("SetButtonState(state:{1})\n但State是相同的\n{0}\n\n", Utilty.CallStack(), state);
+        }
     }
 
 

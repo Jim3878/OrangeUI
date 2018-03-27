@@ -113,18 +113,14 @@ public class PlatHandler : IPlatHandler, ILogTraceable
     public IButtonHandler[] GetAllButton()
     {
         LifeCheck();
-        IButtonHandler[] buttonHandlerArr = new IButtonHandler[buttonHandlerList.Count];
-        int i = 0;
+        List<IButtonHandler> buttonHandlerArr = new List<IButtonHandler>();
+        CheckButtonHandler();
         foreach (var keyValuePair in buttonHandlerList)
         {
-            if (HasButtonHandler(i))
-            {
-                buttonHandlerArr[i] = keyValuePair.Value;
-                i++;
-            }
+            buttonHandlerArr.Add(keyValuePair.Value);
         }
         log += string.Format("GetAllButton()\n{0}\n\n", Utilty.CallStack());
-        return buttonHandlerArr;
+        return buttonHandlerArr.ToArray();
     }
 
     public IButtonHandler GetButton(int id)
@@ -328,6 +324,20 @@ public class PlatHandler : IPlatHandler, ILogTraceable
             onTerminate(this, new EventArgs());
         log += string.Format("Terminate()\n{0}\n\n", Utilty.CallStack());
     }
+
+    public void CheckButtonHandler()
+    {
+        List<IButtonHandler> btnHandlerClone = new List<IButtonHandler>();
+        foreach (var btn in buttonHandlerList)
+        {
+            btnHandlerClone.Add(btn.Value);
+        }
+        foreach (var btn in btnHandlerClone)
+        {
+            HasButtonHandler(btn.ID);
+        }
+    }
+
 
     public bool HasButtonHandler(int id)
     {

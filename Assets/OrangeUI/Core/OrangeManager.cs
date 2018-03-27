@@ -96,6 +96,19 @@ public class OrangeManager : IOrange
 
     }
 
+    public void RegistPlatHandler(IPlatHandler platHandler,params IButtonHandler[] btnHandlers)
+    {
+        int id = platHandler.ID;
+        if (hasPlatHandler(id))
+        {
+            RemovePlatHandler(id);
+            Debug.Log("[Orange]覆蓋已存在之PlatHandler ID = " + platHandler.ID);
+        }
+        platHandlerList.Add(platHandler.ID, platHandler);
+        platHandler.Initialize(this,btnHandlers);
+
+    }
+
     public void RemovePlatHandler(int id)
     {
         if (!hasPlatHandler(id))

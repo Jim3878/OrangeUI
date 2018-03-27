@@ -32,12 +32,16 @@ public class ButtonComponent : MonoBehaviour
         }
     }
     public UnityEvent onInitialzie = new UnityEvent();
-
-
-
+    
     protected virtual void OnButtonHandlerInitialize(object sender, EventArgs e)
     {
         onInitialzie.Invoke();
+    }
+
+    [ContextMenu("Print Log")]
+    public void PrintLog()
+    {
+        Debug.Log(handler.GetLog());
     }
 
 }

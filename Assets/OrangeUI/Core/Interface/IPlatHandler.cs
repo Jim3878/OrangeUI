@@ -23,6 +23,7 @@ public interface IPlatHandler
     int ButtonCount { get; }
 
     void Initialize(IOrange orange);
+    void Initialize(IOrange orange, params IButtonHandler[] btns);
     void Show();
     void CompleteShow();
     void Hide();
